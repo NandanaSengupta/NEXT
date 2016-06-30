@@ -13,6 +13,21 @@ initExp:
         failure_probability:
           description: Confidence of result.
           type: num
+        features:
+          type: list
+          description: A list of lists describing every targets feature. The number of items in this list is the number of targets.
+          values:
+            type: list
+            description: Every one of these elements in the main list is a feature vector.
+            values:
+              type: num
+        mapping:
+          type: list
+          optional: true
+          description: A list that describes the ordering of the feature vectors. The first element in the list of feature vectors should correspond to the first list in this list.
+          values:
+            type: str
+            description: A string that appears in the target's primary description. Using the launch_experiment.py script, this can be the filename of each target (which is in the URL as the primary description).
 
         participant_to_algorithm_management:
           description: How many algorithms does one participant see? (i.e., "one-to-many" means one participant sees many different algorithms).

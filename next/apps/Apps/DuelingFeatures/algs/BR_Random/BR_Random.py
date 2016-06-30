@@ -13,7 +13,7 @@ import next.utils as utils
 
 class BR_Random:
     app_id = 'DuelingFeatures'
-    def initExp(self, butler, n=None, failure_probability=None, params=None):
+    def initExp(self, butler, n=None, failure_probability=None, features=None, params=None):
         """
         This function is meant to set keys used later by the algorith implemented
         in this file.
@@ -33,7 +33,7 @@ class BR_Random:
 
         return True
 
-    def getQuery(self, butler, participant_uid):
+    def getQuery(self, butler, participant_uid, features):
         n = butler.algorithms.get(key='n')
 
         index = numpy.random.choice(n)
@@ -47,7 +47,8 @@ class BR_Random:
         else:
             return [alt_index,index,index]
 
-    def processAnswer(self,butler, left_id=0, right_id=0, painted_id=0, winner_id=0):
+    def processAnswer(self,butler, left_id=0, right_id=0, painted_id=0,
+                      winner_id=0, features=None):
         alt_index = left_id
         if left_id==painted_id:
             alt_index = right_id
@@ -63,7 +64,7 @@ class BR_Random:
 
         return True
 
-    def getModel(self,butler):
+    def getModel(self,butler, features):
         keys = butler.algorithms.get(key='keys')
         key_value_dict = butler.algorithms.get(key=keys)
         n = butler.algorithms.get(key='n')

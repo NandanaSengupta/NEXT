@@ -6,6 +6,13 @@ initExp:
     failure_probability:
       description: Confidence of result.
       type: num
+    features:
+      description: The features present for each target.
+      type: list
+      values:
+        type: list
+        values:
+          type: num
     params:
       description: Params.
       type: any
@@ -20,6 +27,13 @@ getQuery:
     participant_uid:
       type: string
       description: ID of the participant answering the query
+    features:
+      description: The features present for each target.
+      type: list
+      values:
+        type: list
+        values:
+          type: num
   returns:
     type: list
     description: indices of stuff
@@ -27,25 +41,40 @@ getQuery:
       type: num
     
 processAnswer:
-    args:
-      left_id:
-        description: ID of left target
-        type: num
-      right_id:
-        description: ID of right target
-        type: num
-      painted_id:
-        description: Painted ID
-        type: num
-      winner_id:
-        description: Winner ID
-        type: num
-    returns:
-      type: bool
-      description: A boolean indicating success.
-      values: true
+  args:
+    left_id:
+      description: ID of left target
+      type: num
+    right_id:
+      description: ID of right target
+      type: num
+    painted_id:
+      description: Painted ID
+      type: num
+    winner_id:
+      description: Winner ID
+      type: num
+    features:
+      description: The features present for each target.
+      type: list
+      values:
+        type: list
+        values:
+          type: num
+  returns:
+    type: bool
+    description: A boolean indicating success.
+    values: true
 
 getModel:
+  args:
+    features:
+      description: The features present for each target.
+      type: list
+      values:
+        type: list
+        values:
+          type: num
   returns:
     type: tuple
     values:

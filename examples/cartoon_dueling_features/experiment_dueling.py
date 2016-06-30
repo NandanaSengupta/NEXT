@@ -73,8 +73,8 @@ initExp['args']['failure_probability'] = .01
 initExp['args']['participant_to_algorithm_management'] = 'one_to_many'
 initExp['args']['algorithm_management_settings'] = algorithm_management_settings
 initExp['args']['alg_list'] = alg_list
-# initExp['args']['instructions'] = ''
-# initExp['args']['debrief'] = ''
+initExp['args']['instructions'] = 'Choose the spikiest blue ball'
+initExp['args']['debrief'] = 'Thanks for participating!'
 initExp['args']['num_tries'] = 50 # How many tries does each user see?
 
 # How many tries does each user see?
@@ -111,8 +111,8 @@ experiment['primary_type'] = 'image'
 experiment['primary_target_file'] = curr_dir + "/strangefruit30.zip"
 #  experiment['primary_type'] = 'text'
 #  experiment['primary_target_file'] = curr_dir + "/cap436.txt"
-experiment['context'] = curr_dir + "/cap436.jpg"
-experiment['context_type'] = 'image'
+experiment['context'] = 'These is some context (instructions are specified above)'
+experiment['context_type'] = 'text'
 experiment_list.append(experiment)
 
 # Launch the experiment.

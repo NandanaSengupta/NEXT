@@ -1,59 +1,65 @@
-# TODO:
-# x change the algorithm definitions. Done for LilUCB only
-# o explore the dashboard, see what you need to change
-# ? modify the widgets?
 import json
 import numpy
-
+import numpy as np
 import next.apps.SimpleTargetManager
 import next.utils as utils
+
+
+def rearrange_targets(targets, filenames):
+    """
+    targets: list of targets
+    mapping: [(target filename, index), ..., (target filename, index)]
+
+    We assume that the `target filename` is a filename AND that it is uploaded
+    and this filename is present in the target URL.
+    """
+    new_targets = []
+    for target in targets:
+        target_present = [filename in target['primary_description'] for filename in filenames]
+        if sum(target_present) != 1:
+            raise Exception('Looks like multiple URLs had a filename present '
+                            '(or not found in the list of URLs')
+
+        new_targets += [targets[target_present.index(True)]]
+
+    return new_targets
+
+
+def get_features(butler):
+    initExp_args = butler.experiment.get()['args']
+    return initExp_args['features']
+
 class DuelingFeatures(object):
-    def __init__(self,db):
+    def __init__(self, db):
         self.app_id = 'DuelingFeatures'
         self.TargetManager = next.apps.SimpleTargetManager.SimpleTargetManager(db)
 
     def initExp(self, butler, exp_data):
-        """
-        This function is meant to store an additional components in the
-        databse.
-
-        In the implementation of two apps, DuelingBanditsPureExploration and
-        PoolBasedTripletMDS, we only managed targets in this function. We
-        stored the targets to the database than deleted the 'targets' key
-        from exp_data, replacing it with ``exp_data['args']['n']`` to
-        represent a list of n targets. This is easier when doing numerical
-        computation.
-
-        Inputs
-        ------
-        exp_uid : The unique identifier to represent an experiment.
-        exp_data : The keys specified in the app specific YAML file in the
-                   initExp section.
-        butler : The wrapper for database writes. See next/apps/Butler.py for
-                 more documentation.
-
-        Returns
-        -------
-        exp_data: The experiment data, potentially modified.
-        """
         # TODO: change this in every app type coded thus far!
         if 'targetset' in exp_data['args']['targets'].keys():
             n = len(exp_data['args']['targets']['targetset'])
-            self.TargetManager.set_targetset(butler.exp_uid, exp_data['args']['targets']['targetset'])
+            if 'mapping' not in exp_data['args'].keys():
+                raise Exception('When including a features targetset, '
+                                'must also specify mapping')
+            targetset = rearrange_targets(exp_data['args']['targets']['targetset'],
+                                         exp_data['args']['mapping'])
+            self.TargetManager.set_targetset(butler.exp_uid,
+                                             targetset)
         else:
             n = exp_data['args']['targets']['n']
         exp_data['args']['n'] = n
         del exp_data['args']['targets']
 
         alg_data = {}
-        algorithm_keys = ['n','failure_probability']
+        algorithm_keys = ['n', 'failure_probability', 'features']
         for key in algorithm_keys:
-            alg_data[key]=exp_data['args'][key]
+            alg_data[key] = exp_data['args'][key]
 
-        return exp_data,alg_data
+        return exp_data, alg_data
 
     def getQuery(self, butler, alg, args):
-        alg_response = alg({'participant_uid':args['participant_uid']})
+        alg_response = alg({'participant_uid':args['participant_uid'],
+                            'features': get_features(butler)})
         targets = [self.TargetManager.get_target_item(butler.exp_uid, alg_response[i])
                    for i in [0, 1, 2]]
 
@@ -91,19 +97,20 @@ class DuelingFeatures(object):
                 right_id = target['target']['target_id']
             if target['flag'] == 1:
                 painted_id = target['target']['target_id']
-                
+
         winner_id = args['target_winner']
         butler.experiment.increment(key='num_reported_answers_for_' + query['alg_label'])
 
         alg({'left_id':left_id, 
              'right_id':right_id, 
              'winner_id':winner_id,
-             'painted_id':painted_id})
+             'painted_id':painted_id,
+             'features': get_features(butler)})
         return {'winner_id':winner_id}
-                
+
 
     def getModel(self, butler, alg, args):
-        scores, precisions = alg()
+        scores, precisions = alg({'features': get_features(butler)})
         ranks = (-numpy.array(scores)).argsort().tolist()
         n = len(scores)
         indexes = numpy.array(range(n))[ranks]
