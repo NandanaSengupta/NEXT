@@ -29,6 +29,7 @@ def get_features(butler):
     initExp_args = butler.experiment.get()['args']
     return initExp_args['features']
 
+
 class DuelingFeatures(object):
     def __init__(self, db):
         self.app_id = 'DuelingFeatures'
@@ -51,7 +52,7 @@ class DuelingFeatures(object):
         del exp_data['args']['targets']
 
         alg_data = {}
-        algorithm_keys = ['n', 'failure_probability', 'features']
+        algorithm_keys = ['n', 'features']
         for key in algorithm_keys:
             alg_data[key] = exp_data['args'][key]
 
@@ -61,7 +62,7 @@ class DuelingFeatures(object):
         alg_response = alg({'participant_uid':args['participant_uid'],
                             'features': get_features(butler)})
         targets = [self.TargetManager.get_target_item(butler.exp_uid, alg_response[i])
-                   for i in [0, 1, 2]]
+                   for i in [0, 1]]
 
         targets_list = [{'target':targets[0],'label':'left'}, 
                         {'target':targets[1],'label':'right'}]
@@ -74,7 +75,7 @@ class DuelingFeatures(object):
             targets_list[0]['flag'] = 0
             targets_list[1]['flag'] = 1
 
-        return_dict = {'target_indices':targets_list}
+        return_dict = {'target_indices': targets_list}
 
         experiment_dict = butler.experiment.get()
 
@@ -104,13 +105,12 @@ class DuelingFeatures(object):
         alg({'left_id':left_id, 
              'right_id':right_id, 
              'winner_id':winner_id,
-             'painted_id':painted_id,
              'features': get_features(butler)})
         return {'winner_id':winner_id}
 
 
     def getModel(self, butler, alg, args):
-        scores, precisions = alg({'features': get_features(butler)})
+        scores, precisions = alg()
         ranks = (-numpy.array(scores)).argsort().tolist()
         n = len(scores)
         indexes = numpy.array(range(n))[ranks]

@@ -1,25 +1,23 @@
 initExp:
   args:
     n:
-      description: Dimension of embedding.
-      type: num
-    failure_probability:
-      description: Confidence of result.
+      description: Number of targets
       type: num
     features:
       description: The features present for each target.
       type: list
       values:
         type: list
+        description: The feature vector for item $i$.
         values:
           type: num
     params:
-      description: Params.
+      description: Algorithm specific arguments.
       type: any
       optional: true
   returns:
     type: bool
-    description: A boolean indicating success.
+    description: A boolean indicating success (e.g., no key errors)
     values: true
 
 getQuery:
@@ -36,7 +34,7 @@ getQuery:
           type: num
   returns:
     type: list
-    description: indices of stuff
+    description: The left and right indices to present the user.
     values:
       type: num
     
@@ -47,9 +45,6 @@ processAnswer:
       type: num
     right_id:
       description: ID of right target
-      type: num
-    painted_id:
-      description: Painted ID
       type: num
     winner_id:
       description: Winner ID
@@ -67,14 +62,6 @@ processAnswer:
     values: true
 
 getModel:
-  args:
-    features:
-      description: The features present for each target.
-      type: list
-      values:
-        type: list
-        values:
-          type: num
   returns:
     type: tuple
     values:
