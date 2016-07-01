@@ -44,7 +44,7 @@ initExp:
               alg_id:
                 description: A supported algorithm type in the system.
                 type: str
-                values: [BR_Random]
+                values: [BR_Random, UncertaintySampling]
               alg_label:
                 description: A name for this algorithm of your choosing.
                 type: str
